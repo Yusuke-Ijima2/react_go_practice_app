@@ -1,0 +1,10 @@
+development:
+  #使用するDBを選択している
+  dialect: mysql
+  #mysqlに接続するための情報を記入する
+  datasource: root:d9rQ9uBa#@/go_api_db?charset=utf8&parseTime=True&loc=Local
+  #実行するsqlファイルの場所を選択している
+  dir: sql/migrations
+
+  #マイグレーション履歴を保存するテーブル名
+  table: migrations
