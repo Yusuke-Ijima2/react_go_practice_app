@@ -11,6 +11,31 @@ import (
 	dbconnect "Project/api/database"
 )
 
+func UserList() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		db := dbconnect.Connect()
+		defer db.Close()
+		//データが複数になる場合は[]model.User{}で配列にしてあげればOK！！
+		//実際にデータを格納する構造体を選択し、変数に入れる。
+		user := []model.User{}
+		//DB内のusersデーブルを使用するの意味。
+		//SelectでもってくカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
+		result := db.Table("users").Select([]string{
+			"id",
+			"first_name",
+			"family_name",
+			"email",
+			"created_at",
+			"updated_at",
+			"deleted_at"}).Find(&user)
+		if result.RecordNotFound() {
+			fmt.Println("レコードが見つかりません")
+		}
+		//上で定義した変数をここで呼び出してJSONにする。
+		return c.JSON(http.StatusOK, user)
+	}
+}
+
 func Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		//Project/api/database/connect.goで定義したやつ。

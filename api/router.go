@@ -17,6 +17,7 @@ func newRouter() *echo.Echo {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+	e.GET("user/id", controller.UserList())
 	e.POST("user", controller.Create())
 	e.GET("user/:id", controller.UserShow())
 	e.PUT("user/:id", controller.Update())
