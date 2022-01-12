@@ -19,7 +19,7 @@ func UserList() echo.HandlerFunc {
 		//実際にデータを格納する構造体を選択し、変数に入れる。
 		user := []model.User{}
 		//DB内のusersデーブルを使用するの意味。
-		//SelectでもってくカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
+		//SelectでもってくるカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
 		result := db.Table("users").Select([]string{
 			"id",
 			"first_name",
@@ -27,7 +27,8 @@ func UserList() echo.HandlerFunc {
 			"email",
 			"created_at",
 			"updated_at",
-			"deleted_at"}).Find(&user)
+			"deleted_at",
+		}).Find(&user)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
@@ -74,7 +75,9 @@ func UserShow() echo.HandlerFunc {
 			"email",
 			"created_at",
 			"updated_at",
-			"deleted_at"}).Find(&user, "id = ?", user_id)
+			"deleted_at",
+			"User_status_id",
+		}).Find(&user, "id = ?", user_id)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
