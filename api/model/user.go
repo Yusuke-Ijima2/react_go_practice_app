@@ -10,7 +10,7 @@ type User struct {
 	Family_name    string      `json:"family_name"`
 	Email          string      `json:"email"`
 	User_status_id int         `json:"User_status_id"`
-	User_status    User_status `gorm:"foreignKey:Id;AssociationForeignKey:User_status_id" json:"user_status"`
+	User_status    User_status `gorm:"foreignKey:Id" json:"user_status"`
 
 	Created_at time.Time  `json:"created_at"`
 	Updated_at time.Time  `json:"updated_at"`

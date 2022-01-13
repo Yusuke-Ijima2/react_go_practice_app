@@ -20,15 +20,7 @@ func UserList() echo.HandlerFunc {
 		user := []model.User{}
 		//DB内のusersデーブルを使用するの意味。
 		//SelectでもってくるカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
-		result := db.Table("users").Select([]string{
-			"id",
-			"first_name",
-			"family_name",
-			"email",
-			"created_at",
-			"updated_at",
-			"deleted_at",
-		}).Find(&user)
+		result := db.Preload("User_status").Find(&user)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
@@ -36,6 +28,32 @@ func UserList() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, user)
 	}
 }
+
+// type ActivityPlan struct {
+//     Model
+//     ActivityPlanName *string `gorm:"" json:"activityPlanName"`
+//     Activities []*Activity `gorm:"many2many:activity_plan_activities" json:"activity"`
+// }
+
+// type Activity struct {
+//     Model
+//     ActivityName *string `gorm:"" json:"activityName"`
+// }
+
+// func GetAllActivityPlans() (ml []*ActivityPlan, err error) {
+//     tx := db.Begin()
+//     err = tx.Find(&ml).Commit().Error
+
+//     return ml, err
+// }
+
+// func GetAllActivityPlans() (ml []*ActivityPlan, err error) {
+//     tx := db.Preload("Activities").Begin()
+
+//     err = tx.Find(&ml).Commit().Error
+
+//     return ml, err
+// }
 
 func Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -76,7 +94,6 @@ func UserShow() echo.HandlerFunc {
 			"created_at",
 			"updated_at",
 			"deleted_at",
-			"User_status_id",
 		}).Find(&user, "id = ?", user_id)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
