@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     first_name VARCHAR(255),
     family_name VARCHAR(255),
     email VARCHAR(255),
-    User_status_id int(64),
+    user_status_txt VARCHAR(255),
     -- デフォルトはCURRENT_TIMESTAMPが設定されている
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,

@@ -15,45 +15,14 @@ func UserList() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		db := dbconnect.Connect()
 		defer db.Close()
-		//データが複数になる場合は[]model.User{}で配列にしてあげればOK！！
-		//実際にデータを格納する構造体を選択し、変数に入れる。
 		user := []model.User{}
-		//DB内のusersデーブルを使用するの意味。
-		//SelectでもってくるカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
 		result := db.Preload("User_status").Find(&user)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
-		//上で定義した変数をここで呼び出してJSONにする。
 		return c.JSON(http.StatusOK, user)
 	}
 }
-
-// type ActivityPlan struct {
-//     Model
-//     ActivityPlanName *string `gorm:"" json:"activityPlanName"`
-//     Activities []*Activity `gorm:"many2many:activity_plan_activities" json:"activity"`
-// }
-
-// type Activity struct {
-//     Model
-//     ActivityName *string `gorm:"" json:"activityName"`
-// }
-
-// func GetAllActivityPlans() (ml []*ActivityPlan, err error) {
-//     tx := db.Begin()
-//     err = tx.Find(&ml).Commit().Error
-
-//     return ml, err
-// }
-
-// func GetAllActivityPlans() (ml []*ActivityPlan, err error) {
-//     tx := db.Preload("Activities").Begin()
-
-//     err = tx.Find(&ml).Commit().Error
-
-//     return ml, err
-// }
 
 func Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -63,6 +32,26 @@ func Create() echo.HandlerFunc {
 		defer db.Close()
 
 		result := new(model.User)
+		//c.Bind()でリクエストボディから更新データを取得。
+		//err変数にc.Bindを入れてエラーがnilでなければエラーを返す。
+		if err := c.Bind(result); err != nil {
+			return err
+		}
+		// 基本的にCreate(),Update(),Delete()などは値ではなくアドレス(&XXX)を渡す。
+		// &を使うことで変数のアドレスを参照することができる。
+		db.Create(&result)
+		return c.JSON(http.StatusOK, result)
+	}
+}
+
+func Creating() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		//Project/api/database/connect.goで定義したやつ。
+		db := dbconnect.Connect()
+		//この記述は絶対に必要でdeferを書くことでメソッド終了後に発動し、DBをCloseしてくれる。そのためこの下にメソッドを書いても問題ありません。
+		defer db.Close()
+
+		result := new(model.User_status)
 		//c.Bind()でリクエストボディから更新データを取得。
 		//err変数にc.Bindを入れてエラーがnilでなければエラーを返す。
 		if err := c.Bind(result); err != nil {
@@ -86,15 +75,14 @@ func UserShow() echo.HandlerFunc {
 		user_id := c.Param("id")
 		//DB内のusersデーブルを使用するの意味。
 		//SelectでもってくカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
-		result := db.Table("users").Select([]string{
+		result := db.Preload("User_status").Select([]string{
 			"id",
 			"first_name",
 			"family_name",
 			"email",
 			"created_at",
 			"updated_at",
-			"deleted_at",
-		}).Find(&user, "id = ?", user_id)
+			"deleted_at"}).Find(&user, "id = ?", user_id)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
