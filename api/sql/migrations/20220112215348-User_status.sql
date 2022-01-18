@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS `user_statuses` (
     id bigint AUTO_INCREMENT NOT NULL,
     status_name VARCHAR(255),
+    user_status_id bigint NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,

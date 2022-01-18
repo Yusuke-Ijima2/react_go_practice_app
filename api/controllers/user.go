@@ -24,7 +24,8 @@ func UserList() echo.HandlerFunc {
 	}
 }
 
-func Create() echo.HandlerFunc {
+//共通
+func CreateUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		//Project/api/database/connect.goで定義したやつ。
 		db := dbconnect.Connect()
@@ -32,26 +33,6 @@ func Create() echo.HandlerFunc {
 		defer db.Close()
 
 		result := new(model.User)
-		//c.Bind()でリクエストボディから更新データを取得。
-		//err変数にc.Bindを入れてエラーがnilでなければエラーを返す。
-		if err := c.Bind(result); err != nil {
-			return err
-		}
-		// 基本的にCreate(),Update(),Delete()などは値ではなくアドレス(&XXX)を渡す。
-		// &を使うことで変数のアドレスを参照することができる。
-		db.Create(&result)
-		return c.JSON(http.StatusOK, result)
-	}
-}
-
-func Creating() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		//Project/api/database/connect.goで定義したやつ。
-		db := dbconnect.Connect()
-		//この記述は絶対に必要でdeferを書くことでメソッド終了後に発動し、DBをCloseしてくれる。そのためこの下にメソッドを書いても問題ありません。
-		defer db.Close()
-
-		result := new(model.User_status)
 		//c.Bind()でリクエストボディから更新データを取得。
 		//err変数にc.Bindを入れてエラーがnilでなければエラーを返す。
 		if err := c.Bind(result); err != nil {
@@ -75,14 +56,7 @@ func UserShow() echo.HandlerFunc {
 		user_id := c.Param("id")
 		//DB内のusersデーブルを使用するの意味。
 		//SelectでもってくカラムのデータをGORMの構造体の中に入れてJSONとして渡している。
-		result := db.Preload("User_status").Select([]string{
-			"id",
-			"first_name",
-			"family_name",
-			"email",
-			"created_at",
-			"updated_at",
-			"deleted_at"}).Find(&user, "id = ?", user_id)
+		result := db.Preload("User_status").Find(&user, "id = ?", user_id)
 		if result.RecordNotFound() {
 			fmt.Println("レコードが見つかりません")
 		}
@@ -91,7 +65,7 @@ func UserShow() echo.HandlerFunc {
 	}
 }
 
-func Update() echo.HandlerFunc {
+func UpdateUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		db := dbconnect.Connect()
 		defer db.Close()
@@ -113,7 +87,7 @@ func Update() echo.HandlerFunc {
 	}
 }
 
-func Delete() echo.HandlerFunc {
+func DeleteUser() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		db := dbconnect.Connect()
 		defer db.Close()
@@ -121,6 +95,61 @@ func Delete() echo.HandlerFunc {
 		newDelete := new(model.User)
 		user_id := c.Param("id")
 		db.Delete(&newDelete, "id = ?", user_id)
+		return c.JSON(http.StatusOK, newDelete)
+	}
+}
+
+//User_status
+func Creating() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		//Project/api/database/connect.goで定義したやつ。
+		db := dbconnect.Connect()
+		//この記述は絶対に必要でdeferを書くことでメソッド終了後に発動し、DBをCloseしてくれる。そのためこの下にメソッドを書いても問題ありません。
+		defer db.Close()
+
+		result := new(model.User_status)
+		//c.Bind()でリクエストボディから更新データを取得。
+		//err変数にc.Bindを入れてエラーがnilでなければエラーを返す。
+		if err := c.Bind(result); err != nil {
+			return err
+		}
+		// 基本的にCreate(),Update(),Delete()などは値ではなくアドレス(&XXX)を渡す。
+		// &を使うことで変数のアドレスを参照することができる。
+		db.Create(&result)
+		return c.JSON(http.StatusOK, result)
+	}
+}
+
+func Update() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		db := dbconnect.Connect()
+		defer db.Close()
+
+		newPost := new(model.User_status)
+		if err := c.Bind(newPost); err != nil {
+			return err
+		}
+		User_status_id := c.Param("user_status_id")
+		if User_status_id != "" {
+			post := model.User_status{}
+			db.First(&post, "user_status_id = ?", User_status_id).Update(newPost)
+			fmt.Println(post)
+			return c.JSON(http.StatusOK, post)
+		} else {
+			return c.JSON(http.StatusNotFound, nil)
+		}
+
+	}
+}
+
+func Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		db := dbconnect.Connect()
+		defer db.Close()
+
+		newDelete := new(model.User_status)
+		User_status_id := c.Param("user_status_id")
+		db.Delete(&newDelete, "user_status_id = ?", User_status_id)
 		return c.JSON(http.StatusOK, newDelete)
 	}
 }
