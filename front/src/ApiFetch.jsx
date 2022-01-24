@@ -1,141 +1,273 @@
-import React from "react";
-// useFormikをインポート
+import React, { useState } from "react";
+import * as Yup from "yup";
 import { useFormik } from "formik";
 
+import { ApiGet } from "./ApiGet";
+
 export const ApiFetch = () => {
-  // 入力フォームの初期値 (initialValues属性にセットする)
+  const [workTypesChange, setWorkTypesChange] = useState("正社員");
+
   const initialPostValue = {
     first_name: "",
     family_name: "",
     email: "",
     user_status_txt: "",
-    user_status: {
-      status_name: "",
-    },
+    status_name: "",
   };
 
-  // 下記追記
+  const PostSchema = Yup.object().shape({
+    // 型はstringで入力
+    first_name: Yup.string()
+      // required()で入力必須にする
+      .required("名前は入力必須です")
+      // max()で文字数制限を設ける
+      .min(2, "名前は2文字以上で入力してください"),
+    family_name: Yup.string()
+      // required()で入力必須にする
+      .required("名字は入力必須です")
+      // max()で文字数制限を設ける
+      .min(2, "名字は2文字以上で入力してください"),
+  });
+
   const {
-    // ここにフォームで入力した値や初期値が入る
     values: newPostData,
     setValues: setNewPostData,
-
-    // この場合、onFinishメソッドを叩くと、onSubmit内の処理が走る
-    // フォームのデータ送信のアクションに用いられる
     handleSubmit: onFinish,
     handleChange,
+    errors,
+    touched,
   } = useFormik({
     // 初期値を設定
     initialValues: initialPostValue,
-
     // handleSubmit属性のonFinishが発火　→ onSubmit内の処理が走る
-    onSubmit: async () => {
-      alert("フォーム送信成功!!");
+    validationSchema: PostSchema,
+
+    onSubmit: () => {
+      if (workTypesChange === "正社員") {
+        newPostData.user_status_txt = "正社員";
+      } else if (workTypesChange === "インターン") {
+        newPostData.user_status_txt = "インターン";
+      }
+      saveDate();
+      alert("保存が完了しました");
     },
   });
 
   // テンプレートボタンをクリックすると、入力フォームにテンプレートの値が入力される。
   const onClickMakeTemplate = () => {
-    // useStateの値を更新する時と同じ様な事が出来ます
+    // useStateの値を更新する時と同じ様な事が出来る
     setNewPostData({
       first_name: "名前",
       family_name: "名字",
       email: "メールアドレス",
       user_status_txt: "種類",
-      user_status: {
-        status_name: "詳細",
-      },
+      status_name: "詳細",
     });
   };
 
-  console.log(newPostData);
-
   const saveDate = () => {
-    onFinish();
-    // サーバへ送りたいデータ
-    const data = {
+    const userData = {
       first_name: newPostData.first_name,
       family_name: newPostData.family_name,
       email: newPostData.email,
       user_status_txt: newPostData.user_status_txt,
-      status_name: newPostData.user_status.status_name,
     };
-    fetch("http://localhost:8080/user", {
+    fetch("http://localhost:8080/user_all/all", {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
-    }).then((json) => {
-      alert("保存完了しました。");
-    });
+      body: JSON.stringify(userData),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        const id = json.id;
+        const user_status_Data = {
+          user_status_id: id,
+          status_name: newPostData.status_name,
+        };
+        fetch("http://localhost:8080/user/user_status_id", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user_status_Data),
+        }).then((json) => {
+          alert("保存完了しました。");
+          window.location.href = "";
+        });
+      });
+  };
+
+  const workTypes = ["正社員", "インターン"];
+
+  const onChangeWorkTypes = (e) => {
+    setWorkTypesChange(e.target.value);
   };
 
   return (
     <>
-      <div>
-        <label>
-          <p>名前</p>
-        </label>
-        <input
-          type="text"
-          // nameにtitleを追記
-          name="first_name"
-          // newPostData.titleを追記　→ initialPostValueで設定したtitleの初期値が入る
-          value={newPostData.first_name}
-          //これを全ての入力フォームに追記するだけで、newPostDataに入力データが入ってくる */}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>
-          <p>名字</p>
-        </label>
-        <input
-          type="text"
-          name="content"
-          value={newPostData.family_name}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>
-          <p>メールアドレス</p>
-        </label>
-        <input
-          type="text"
-          name="email"
-          value={newPostData.email}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>
-          <p>種類</p>
-        </label>
-        <input
-          type="text"
-          name="user_status_txt"
-          value={newPostData.user_status_txt}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>
-          <p>詳細</p>
-        </label>
-        <input
-          type="text"
-          name="status_name"
-          value={newPostData.status_name}
-          onChange={handleChange}
-        />
-      </div>
+      <div className="flex">
+        <div>
+          <select type="text" onChange={onChangeWorkTypes}>
+            {workTypes.map((workType) => (
+              <option key={workType}>{workType}</option>
+            ))}
+          </select>
+          {workTypesChange === "正社員" ? (
+            <div className="flex">
+              <div>
+                <div>
+                  <label>
+                    <p>名前</p>
+                    {errors.first_name && touched.first_name ? (
+                      <p className="error">{errors.first_name}</p>
+                    ) : null}
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={newPostData.first_name}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>名字</p>
+                    {errors.family_name && touched.family_name ? (
+                      <p className="error">{errors.family_name}</p>
+                    ) : null}
+                  </label>
+                  <input
+                    type="text"
+                    name="family_name"
+                    value={newPostData.family_name}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>メールアドレス</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="email"
+                    value={newPostData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>種類</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="user_status_txt"
+                    value={newPostData.user_status_txt}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>詳細</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="status_name"
+                    value={newPostData.status_name}
+                    onChange={handleChange}
+                  />
+                </div>
 
-      {/* テンプレート作成ボタンを追記 */}
-      <button onClick={() => onClickMakeTemplate()}>テンプレート</button>
-      <button onClick={() => saveDate()}>送信</button>
+                {/* テンプレート作成ボタンを追記 */}
+                <button onClick={() => onClickMakeTemplate()}>
+                  テンプレート
+                </button>
+                <button onClick={() => onFinish()}>送信</button>
+              </div>
+            </div>
+          ) : null}
+
+          {workTypesChange === "インターン" ? (
+            <div className="flex">
+              <div>
+                <div>
+                  <label>
+                    <p>名前</p>
+                    {errors.first_name && touched.first_name ? (
+                      <p className="error">{errors.first_name}</p>
+                    ) : null}
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={newPostData.first_name}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>名字</p>
+                    {errors.family_name && touched.family_name ? (
+                      <p className="error">{errors.family_name}</p>
+                    ) : null}
+                  </label>
+                  <input
+                    type="text"
+                    name="family_name"
+                    value={newPostData.family_name}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>メールアドレス</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="email"
+                    value={newPostData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>種類</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="user_status_txt"
+                    value={newPostData.user_status_txt}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label>
+                    <p>詳細</p>
+                  </label>
+                  <input
+                    type="text"
+                    name="status_name"
+                    value={newPostData.status_name}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* テンプレート作成ボタンを追記 */}
+                <button onClick={() => onClickMakeTemplate()}>
+                  テンプレート
+                </button>
+                <button onClick={() => onFinish()}>送信</button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div>
+          <ApiGet />
+        </div>
+      </div>
     </>
   );
 };
