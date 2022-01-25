@@ -7,6 +7,8 @@ import { ApiGet } from "./ApiGet";
 export const ApiFetch = () => {
   const [workTypesChange, setWorkTypesChange] = useState("正社員");
 
+  const baseUrl = "http://localhost:8080/";
+
   const initialPostValue = {
     first_name: "",
     family_name: "",
@@ -50,6 +52,7 @@ export const ApiFetch = () => {
       }
       saveDate();
       alert("保存が完了しました");
+      window.location.href = "";
     },
   });
 
@@ -72,7 +75,7 @@ export const ApiFetch = () => {
       email: newPostData.email,
       user_status_txt: newPostData.user_status_txt,
     };
-    fetch("http://localhost:8080/user_all/all", {
+    fetch(baseUrl + "user_all/all", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -87,16 +90,13 @@ export const ApiFetch = () => {
           user_status_id: id,
           status_name: newPostData.status_name,
         };
-        fetch("http://localhost:8080/user/user_status_id", {
+        fetch(baseUrl + "user/user_status_id", {
           method: "POST",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
           },
           body: JSON.stringify(user_status_Data),
-        }).then((json) => {
-          alert("保存完了しました。");
-          window.location.href = "";
         });
       });
   };
@@ -116,153 +116,78 @@ export const ApiFetch = () => {
               <option key={workType}>{workType}</option>
             ))}
           </select>
-          {workTypesChange === "正社員" ? (
-            <div className="flex">
+          <div className="flex">
+            <div>
               <div>
-                <div>
-                  <label>
-                    <p>名前</p>
-                    {errors.first_name && touched.first_name ? (
-                      <p className="error">{errors.first_name}</p>
-                    ) : null}
-                  </label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={newPostData.first_name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>名字</p>
-                    {errors.family_name && touched.family_name ? (
-                      <p className="error">{errors.family_name}</p>
-                    ) : null}
-                  </label>
-                  <input
-                    type="text"
-                    name="family_name"
-                    value={newPostData.family_name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>メールアドレス</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="email"
-                    value={newPostData.email}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>種類</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="user_status_txt"
-                    value={newPostData.user_status_txt}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>詳細</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="status_name"
-                    value={newPostData.status_name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* テンプレート作成ボタンを追記 */}
-                <button onClick={() => onClickMakeTemplate()}>
-                  テンプレート
-                </button>
-                <button onClick={() => onFinish()}>送信</button>
+                <label>
+                  <p>名前</p>
+                  {errors.first_name && touched.first_name ? (
+                    <p className="error">{errors.first_name}</p>
+                  ) : null}
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={newPostData.first_name}
+                  onChange={handleChange}
+                />
               </div>
-            </div>
-          ) : null}
-
-          {workTypesChange === "インターン" ? (
-            <div className="flex">
               <div>
-                <div>
-                  <label>
-                    <p>名前</p>
-                    {errors.first_name && touched.first_name ? (
-                      <p className="error">{errors.first_name}</p>
-                    ) : null}
-                  </label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={newPostData.first_name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>名字</p>
-                    {errors.family_name && touched.family_name ? (
-                      <p className="error">{errors.family_name}</p>
-                    ) : null}
-                  </label>
-                  <input
-                    type="text"
-                    name="family_name"
-                    value={newPostData.family_name}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>メールアドレス</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="email"
-                    value={newPostData.email}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>種類</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="user_status_txt"
-                    value={newPostData.user_status_txt}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label>
-                    <p>詳細</p>
-                  </label>
-                  <input
-                    type="text"
-                    name="status_name"
-                    value={newPostData.status_name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                {/* テンプレート作成ボタンを追記 */}
-                <button onClick={() => onClickMakeTemplate()}>
-                  テンプレート
-                </button>
-                <button onClick={() => onFinish()}>送信</button>
+                <label>
+                  <p>名字</p>
+                  {errors.family_name && touched.family_name ? (
+                    <p className="error">{errors.family_name}</p>
+                  ) : null}
+                </label>
+                <input
+                  type="text"
+                  name="family_name"
+                  value={newPostData.family_name}
+                  onChange={handleChange}
+                />
               </div>
+              <div>
+                <label>
+                  <p>メールアドレス</p>
+                </label>
+                <input
+                  type="text"
+                  name="email"
+                  value={newPostData.email}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label>
+                  <p>種類</p>
+                </label>
+                <input
+                  type="text"
+                  name="user_status_txt"
+                  value={newPostData.user_status_txt}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label>
+                  <p>詳細</p>
+                </label>
+                <input
+                  type="text"
+                  name="status_name"
+                  value={newPostData.status_name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <input
+                type="submit"
+                value="テンプレート"
+                onClick={() => onClickMakeTemplate()}
+              />
+              <input type="submit" value="送信" onClick={() => onFinish()} />
             </div>
-          ) : null}
+          </div>
         </div>
         <div>
           <ApiGet />
